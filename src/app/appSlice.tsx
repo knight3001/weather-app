@@ -1,5 +1,5 @@
 import { debounce } from 'lodash';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useAppDispatch } from './store';
 import { fetchCurrentWeather } from '../features/Current/current.slice';
 import { fetchForecastWeather } from '../features/Forecast/forecast.slice';
@@ -7,15 +7,29 @@ import { fetchForecastWeather } from '../features/Forecast/forecast.slice';
 export const useHandleSearchChange = () => {
   const [searchCity, setSearchCity] = useState('');
   const dispatch = useAppDispatch();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const search = useCallback(
-    debounce((serachText: string) => {
-      let searchCity = serachText ? serachText : 'Brisbane,AU';
+
+  const fetchWeatherData = useCallback(
+    (searchCity: string) => {
       dispatch(fetchCurrentWeather(searchCity));
       dispatch(fetchForecastWeather(searchCity));
-    }, 1000),
-    [],
+    },
+    [dispatch],
   );
+
+  const search = useMemo(
+    () =>
+      debounce((serachText: string) => {
+        let searchCity = serachText ? serachText : 'Brisbane,AU';
+        fetchWeatherData(searchCity);
+      }, 1000),
+    [fetchWeatherData],
+  );
+  useEffect(() => {
+    return () => {
+      search.cancel();
+    };
+  }, [search]);
+
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const searchCity = event.currentTarget.value;
     setSearchCity(searchCity);
@@ -25,5 +39,6 @@ export const useHandleSearchChange = () => {
     dispatch(fetchCurrentWeather('Brisbane,AU'));
     dispatch(fetchForecastWeather('Brisbane,AU'));
   }, [dispatch]);
+
   return { searchCity, handleSearchChange };
 };
