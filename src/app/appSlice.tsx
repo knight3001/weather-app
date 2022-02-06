@@ -1,8 +1,9 @@
-import { debounce } from 'lodash';
+//import { debounce } from 'lodash';
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useAppDispatch } from './store';
 import { fetchCurrentWeather } from '../features/Current/current.slice';
 import { fetchForecastWeather } from '../features/Forecast/forecast.slice';
+import {debounce} from "./functions/denounce";
 
 export const useHandleSearchChange = () => {
   const [searchCity, setSearchCity] = useState('');
@@ -26,7 +27,7 @@ export const useHandleSearchChange = () => {
   );
   useEffect(() => {
     return () => {
-      search.cancel();
+      //search.cancel();
     };
   }, [search]);
 
